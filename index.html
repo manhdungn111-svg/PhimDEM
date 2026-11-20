@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta name="theme-color" content="#000"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><title>Phim Đêm</title>
+<!DOCTYPE html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta name="theme-color" content="#000"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="icon" href="icon-192.png"><meta name="apple-mobile-web-app-title" content="Phim Đêm"><meta name="mobile-web-app-capable" content="yes"><title>Phim Đêm</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.13/hls.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -142,7 +142,7 @@ ${US?`<div class="row" data-a="up"><span>Sao lưu lên đám mây ngay</span><sm
 <div class="sub">Cài đặt</div><div class="row" data-a="nm"><span>Tên hồ sơ</span><small>${E(S.name)}</small></div>
 <div class="row"><span>Nguồn phim</span><div class="seg">${[['kk','KKPhim'],['ng','NguonC'],['both','Cả hai']].map(s=>`<button class="${S.src==s[0]?'on':''}" data-src="${s[0]}">${s[1]}</button>`).join('')}</div></div>
 ${S.av?'<div class="row" data-a="ar"><span>Xóa ảnh đại diện</span><small></small></div>':''}<div class="row" data-a="ex"><span>Sao lưu ra tệp</span><small>.json</small></div><div class="row" data-a="im"><span>Khôi phục từ tệp</span><small>.json</small></div><div class="row" data-a="ch"><span>Xóa lịch sử xem</span><small>${n} phim</small></div>
-<div class="sub">Trên iPhone: bấm Chia sẻ → Thêm vào màn hình chính để cài web như một ứng dụng.</div><input type="file" id="fi" accept=".json" hidden>`;
+${STANDALONE?'':`<div class="row" data-a="ins"><span>Thêm vào màn hình chính</span><small>Cài ứng dụng</small></div>`}<input type="file" id="fi" accept=".json" hidden>`;
  $('#fi').onchange=async e=>{try{merge(JSON.parse(await e.target.files[0].text()));toast('Đã khôi phục');acct();sync()}catch{toast('Tệp không hợp lệ')}}}
 const av=()=>{const a=$('#av');a.textContent=S.av?'':(S.name[0]||'K').toUpperCase();a.style.backgroundImage=S.av?`url(${S.av})`:'';a.style.backgroundSize='cover'};av();
 $('#af').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader;r.onload=()=>{const i=new Image;i.onload=()=>{const c=document.createElement('canvas'),m=Math.min(i.width,i.height);c.width=c.height=160;c.getContext('2d').drawImage(i,(i.width-m)/2,(i.height-m)/2,m,m,0,0,160,160);S.av=c.toDataURL('image/jpeg',.82);sv('av',S.av);av();acct();sync();toast('Đã đổi ảnh đại diện')};i.src=r.result};r.readAsDataURL(f);e.target.value=''};
@@ -216,6 +216,7 @@ document.onclick=e=>{const t=e.target;let a;
   fs(){const w=$('#vw');if(document.fullscreenElement)document.exitFullscreen();else if(w.requestFullscreen)w.requestFullscreen().then(()=>screen.orientation?.lock?.('landscape').catch(()=>{})).catch(()=>{});else V.webkitEnterFullscreen?.()},
   au0(){openAu(0)},au1(){openAu(1)},auM(){openAu(1-am)},auS(){auth()},out(){AU.signOut().then(()=>{toast('Đã đăng xuất');acct()})},up(){push().then(()=>toast('Đã sao lưu')).catch(()=>toast('Sao lưu thất bại'))},
   ap(){$('#af').click()},ar(){S.av='';sv('av','');av();acct();sync()},lt0(){lt=0;go(1)},lt1(){lt=1;go(1)},
+  ins(){if(DP){DP.prompt();DP=0}else toast(/iphone|ipad|ipod/i.test(navigator.userAgent)?'Bấm nút Chia sẻ ở thanh Safari, rồi chọn Thêm vào MH chính':'Mở menu ⋮ của trình duyệt, chọn Thêm vào màn hình chính')},
   nm(){const n=prompt('Tên hồ sơ',S.name);if(n&&n.trim()){S.name=n.trim().slice(0,24);sv('name',S.name);av();acct();sync()}},
   ex(){const b=new Blob([JSON.stringify({wl:S.wl,hi:S.hi,name:S.name})],{type:'application/json'}),l=document.createElement('a');l.href=URL.createObjectURL(b);l.download='phim-dem-backup.json';l.click()},
   im(){$('#fi').click()},
@@ -236,5 +237,8 @@ if(FB.apiKey&&window.firebase){firebase.initializeApp(FB);AU=firebase.auth();DB=
  AU.onAuthStateChanged(async u=>{US=u;if(u){try{const d=await fdoc().get();if(d.exists)merge(JSON.parse(d.data().data||'{}'));await push()}catch{toast('Không đồng bộ được, kiểm tra quy tắc Firestore')}}if(cp==4)acct()})}
 new MutationObserver(()=>{document.body.style.overflow=$$('.ov.on').length?'hidden':''}).observe($('#app'),{attributes:true,subtree:true,attributeFilter:['class']});
 document.addEventListener('gesturestart',e=>e.preventDefault());
+let DP;const STANDALONE=matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();DP=e});
+if('serviceWorker'in navigator&&/^https:|localhost/.test(location.protocol+location.hostname))navigator.serviceWorker.register('sw.js').catch(()=>{});
 home();
 </script></body></html>
