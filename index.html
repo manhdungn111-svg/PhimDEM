@@ -247,10 +247,13 @@ const PX=[...(WP?[u=>`${WP}?u=${encodeURIComponent(u)}`]:[]),u=>u,u=>'https://co
 let px=WP?0:(+ld('px')||0)%PX.length,MERR='';
 async function MJ(u){MERR='';for(let k=0;k<PX.length;k++){const i=(px+k)%PX.length;try{const r=await fetch(PX[i](u));if(r.ok){px=i;sv('px',i);return await r.json()}MERR+=`[${i}] HTTP ${r.status} `}catch(e){MERR+=`[${i}] ${e.message||'lỗi mạng'} `}}throw new Error(MERR)}
 const MD=(p,o)=>MJ(`${MDX}${p}?${qs(o||{})}`);
+const MI=u=>WP&&u?`${WP}?u=${encodeURIComponent(u)}`:'';
+const coverFb=e=>{if(e.dataset.px){const u=e.dataset.px;e.dataset.px='';e.src=u}else e.remove()};
+const cim=u=>`src="${E(u)}" referrerpolicy="no-referrer" data-px="${E(MI(u))}" onerror="coverFb(this)"`;
 const ST={ongoing:'Đang ra',completed:'Hoàn thành',hiatus:'Tạm ngưng',cancelled:'Đã hủy'};
 const MT=m=>{const a=m.attributes,f=m.relationships.find(r=>r.type=='cover_art')?.attributes?.fileName,t=a.title.en||Object.values(a.title)[0]||'?',alt=(a.altTitles||[]).map(x=>x[ML]).find(Boolean);
  return{id:m.id,name:alt||t,thumb:f?`https://uploads.mangadex.org/covers/${m.id}/${f}.256.jpg`:'',desc:a.description?.[ML]||a.description?.en||'',tags:(a.tags||[]).map(x=>x.attributes.name.en),status:ST[a.status]||a.status||'',year:a.year}};
-const MC=x=>{M[x.id]=M[x.id]||x;return`<div class="c" data-md="${x.id}"><div class="im sk"><img loading="lazy" src="${E(x.thumb)}" onerror="this.remove()"></div><b>${E(x.name)}</b><i><span>${E(x.sub||[x.year,x.status].filter(Boolean).join(' • '))}</span></i></div>`};
+const MC=x=>{M[x.id]=M[x.id]||x;return`<div class="c" data-md="${x.id}"><div class="im sk"><img loading="lazy" ${cim(x.thumb)}></div><b>${E(x.name)}</b><i><span>${E(x.sub||[x.year,x.status].filter(Boolean).join(' • '))}</span></i></div>`};
 async function mlist(p,o){const r=await MD('/manga',{limit:24,offset:(p-1)*24,includes:['cover_art'],contentRating:CR,hasAvailableChapters:'true',availableTranslatedLanguage:[ML],...o});return r.data.map(MT).map(x=>(M[x.id]=x))}
 const SORTS=[['followedCount','Phổ biến'],['latestUploadedChapter','Mới cập nhật'],['rating','Đánh giá cao']];
 const mchips=()=>$('#mdc').innerHTML=SORTS.map(s=>`<button class="${MS==s[0]?'on':''}" data-ms="${s[0]}">${s[1]}</button>`).join('')+[['vi','Tiếng Việt'],['en','English']].map(l=>`<button class="${ML==l[0]?'on':''}" data-ml="${l[0]}">${l[1]}</button>`).join('');
@@ -260,10 +263,10 @@ function mrecent(){const xs=Object.values(S.mh).sort((a,b)=>b.at-a.at).slice(0,1
 async function chapters(id){let out=[],off=0,tot=1;while(off<tot&&off<3000){const r=await MD(`/manga/${id}/feed`,{limit:500,offset:off,translatedLanguage:[ML],'order[chapter]':'asc',contentRating:CR,includeExternalUrl:0});tot=r.total;off+=500;out.push(...r.data)}
  const seen=new Set();return out.filter(c=>c.attributes.pages>0).map(c=>({id:c.id,ch:c.attributes.chapter,t:c.attributes.title})).filter(c=>{const k=c.ch??c.id;if(seen.has(k))return 0;seen.add(k);return 1})}
 async function openM(id){const o=$('#md');o.classList.add('on');o.scrollTop=0;curM=id;const x0=M[id]||{};
- o.innerHTML=`<div class="tb"><button data-x="md">${I.x}</button></div><div class="ban"><img src="${E((x0.thumb||'').replace('.256.','.512.'))}"><i></i></div>${LD}`;
+ o.innerHTML=`<div class="tb"><button data-x="md">${I.x}</button></div><div class="ban"><img ${cim((x0.thumb||'').replace('.256.','.512.'))}><i></i></div>${LD}`;
  try{const[d,c]=await Promise.all([MD('/manga/'+id,{includes:['cover_art']}).then(r=>MT(r.data)),chapters(id)]);M[id]=d;MCH=c;renderM()}catch{o.innerHTML+='<div class="em">Không tải được truyện này.</div>'}}
 function renderM(){const x=M[curM],h=S.mh[curM],ci=h?Math.max(0,MCH.findIndex(c=>c.ch==h.ch)):0,od=MCH.map((c,i)=>i);if(!masc)od.reverse();
- $('#md').innerHTML=`<div class="tb"><button data-x="md">${I.x}</button></div><div class="ban"><img src="${E(x.thumb.replace('.256.','.512.'))}"><i></i></div>
+ $('#md').innerHTML=`<div class="tb"><button data-x="md">${I.x}</button></div><div class="ban"><img ${cim(x.thumb.replace('.256.','.512.'))}><i></i></div>
 <div class="db"><h2>${E(x.name)}</h2><div class="hm">${x.status?`<span class="chip">${E(x.status)}</span>`:''}<span>${E([x.year,x.tags.slice(0,3).join(', ')].filter(Boolean).join(' • '))}</span></div>
 <p class="ds cl">${E(x.desc)||'Chưa có mô tả.'}</p><a class="more" data-a="mo">Chi tiết hơn</a>
 ${MCH.length?`<div class="ha" style="margin:14px 0"><button class="pri" data-mc="${ci}">${I.play}${h?'Tiếp tục đọc Chương '+E(h.ch):'Bắt đầu đọc'}</button></div>`:`<p class="em">Chưa có chương ${ML=='vi'?'tiếng Việt':'tiếng Anh'}. Hãy đổi ngôn ngữ ở trang MangaDex.</p>`}
@@ -272,7 +275,7 @@ ${od.map(i=>{const c=MCH[i];return`<div class="ep" data-mc="${i}" style="padding
 async function readCh(i){const c=MCH[i];if(!c)return toast(i<0?'Đây là chương đầu':'Đã hết chương');rc=i;$('#mcl').classList.remove('on');const o=$('#mr');o.classList.add('on');o.scrollTop=0;
  const bar=`<div class="rt" id="rt"><button data-x="mr">${I.x}</button><span style="flex:1">${E(M[curM].name)} • ${c.ch?'Chương '+E(c.ch):'Oneshot'}</span><button data-rd="-1">${I.left}</button><button data-rd="1">${I.right}</button><button data-a="cl">${I.list}</button></div>`;o.innerHTML=bar+LD;
  try{const r=await MJ(`${MDX}/at-home/server/${c.id}`);
-  o.innerHTML=bar+`<div class="pg">${(MQ&&r.chapter.dataSaver?.length?r.chapter.dataSaver:r.chapter.data).map((n,k)=>`<img ${k<3?'':'loading="lazy" '}decoding="async" src="${r.baseUrl}/${MQ&&r.chapter.dataSaver?.length?'data-saver':'data'}/${r.chapter.hash}/${n}">`).join('')}</div><div class="rn"><button data-rd="-1">← Chương trước</button><button class="nx" data-rd="1">Chương sau →</button></div>`;
+  o.innerHTML=bar+`<div class="pg">${(MQ&&r.chapter.dataSaver?.length?r.chapter.dataSaver:r.chapter.data).map((n,k)=>`<img ${k<3?'':'loading="lazy" '}decoding="async" referrerpolicy="no-referrer" src="${r.baseUrl}/${MQ&&r.chapter.dataSaver?.length?'data-saver':'data'}/${r.chapter.hash}/${n}">`).join('')}</div><div class="rn"><button data-rd="-1">← Chương trước</button><button class="nx" data-rd="1">Chương sau →</button></div>`;
   S.mh[curM]={x:{id:curM,name:M[curM].name,thumb:M[curM].thumb},ch:c.ch||'',at:Date.now()};sv('mh',S.mh);sync()}
  catch{o.innerHTML=bar+'<div class="em">Không tải được chương này.</div>'}}
 /* ---- đăng nhập & sao lưu đám mây ---- */
