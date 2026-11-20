@@ -239,7 +239,7 @@ document.onclick=e=>{const t=e.target;let a;
 const MDX='https://api.mangadex.org',CR=['safe','suggestive'],M={};
 let ML=ld('ml')||'vi',MS='followedCount',mt,MCH=[],curM='',masc=0,rc=0;
 const qs=o=>Object.entries(o).flatMap(([k,v])=>Array.isArray(v)?v.map(x=>`${k}[]=${encodeURIComponent(x)}`):[`${k}=${encodeURIComponent(v)}`]).join('&');
-const WP='';/* dán địa chỉ Cloudflare Worker vào đây, ví dụ https://phimdem-proxy.tenban.workers.dev */
+const WP='https://phimdem-proxy.manhdungn111.workers.dev';/* dán địa chỉ Cloudflare Worker vào đây, ví dụ https://phimdem-proxy.tenban.workers.dev */
 const PX=[...(WP?[u=>`${WP}?u=${encodeURIComponent(u)}`]:[]),u=>u,u=>'https://corsproxy.io/?url='+encodeURIComponent(u),u=>'https://api.allorigins.win/raw?url='+encodeURIComponent(u)];
 let px=WP?0:(+ld('px')||0)%PX.length,MERR='';
 async function MJ(u){MERR='';for(let k=0;k<PX.length;k++){const i=(px+k)%PX.length;try{const r=await fetch(PX[i](u));if(r.ok){px=i;sv('px',i);return await r.json()}MERR+=`[${i}] HTTP ${r.status} `}catch(e){MERR+=`[${i}] ${e.message||'lỗi mạng'} `}}throw new Error(MERR)}
