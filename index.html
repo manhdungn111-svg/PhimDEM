@@ -66,7 +66,7 @@ html,body{overflow-x:hidden;max-width:100%;touch-action:pan-y;-webkit-text-size-
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const ld=k=>{try{return JSON.parse(localStorage[k])}catch{}},sv=(k,v)=>{try{localStorage[k]=JSON.stringify(v)}catch{}};
 /* ĐIỀN apiKey và appId của Web app Firebase (Project settings) để bật đăng nhập */
-const FB={apiKey:'',authDomain:'flixanime-1f434.firebaseapp.com',projectId:'flixanime-1f434',appId:''};
+const FB={apiKey:'AIzaSyBAHBUrFVD4KQYmhzVUV80TKb0DoQxyftg',authDomain:'flixanime-1f434.firebaseapp.com',projectId:'flixanime-1f434',appId:'1:1039326880851:web:87fd0dbc4228847451d2a6'};
 const S={src:ld('src')||'kk',av:ld('av')||'',wl:ld('wl')||[],hi:ld('hi')||{},name:ld('name')||'Khách'},R={};
 const KK='https://phimapi.com',NG='https://phim.nguonc.com/api';
 const J=u=>fetch(u).then(r=>{if(!r.ok)throw 0;return r.json()});
@@ -225,7 +225,7 @@ document.onclick=e=>{const t=e.target;let a;
 /* ---- đăng nhập & sao lưu đám mây ---- */
 let AU,DB,US,syt,am=0;
 function merge(d){const ids=new Set(S.wl.map(x=>x.id));(d.wl||[]).forEach(x=>{if(!ids.has(x.id))S.wl.push(x)});for(const k in d.hi||{})if(!S.hi[k]||d.hi[k].at>S.hi[k].at)S.hi[k]=d.hi[k];if(d.name&&S.name=='Khách')S.name=d.name;if(d.av&&!S.av)S.av=d.av;sv('wl',S.wl);sv('hi',S.hi);sv('name',S.name);sv('av',S.av);av()}
-const fdoc=()=>DB.collection('users').doc(US.uid);
+const fdoc=()=>DB.collection('phimdem').doc(US.uid);
 const push=()=>US?fdoc().set({data:JSON.stringify({wl:S.wl,hi:S.hi,name:S.name,av:S.av}),at:Date.now()}):Promise.reject();
 function sync(){if(!US)return;clearTimeout(syt);syt=setTimeout(()=>push().catch(()=>{}),2500)}
 function openAu(m){if(!AU)return toast('Chưa bật đăng nhập: điền cấu hình Firebase');am=m;$('#at').textContent=$('#ab').textContent=m?'Đăng ký':'Đăng nhập';$('#am').textContent=m?'Đã có tài khoản? Đăng nhập':'Chưa có tài khoản? Đăng ký';$('#ar').textContent='';$('#au').classList.add('on')}
