@@ -122,7 +122,7 @@ let cp=0,gInit={};
 function go(i){cp=i;$$('.page').forEach((p,k)=>p.classList.toggle('on',k==i));$$('#tabs button').forEach(b=>b.classList.toggle('on',+b.dataset.go==i));scrollTo(0,0);
  if(i==1)lists();if(i==2&&!gInit[2]){gInit[2]=1;gc();browse('')}if(i==3&&!gInit[3]){gInit[3]=1;year(new Date().getFullYear())}if(i==4)acct();if(i==5){if(!gInit[5]){gInit[5]=1;mchips();mload()}mrecent()}}
 function G(el,fn,r){let p=1,end=0,busy=0;el.innerHTML='<div class="gr"></div><div class="sen"></div>';const g=el.firstChild,s=el.lastChild;
- const more=async()=>{if(busy||end)return;busy=1;s.innerHTML=LD;try{const xs=await fn(p++);if(!xs.length)end=1;g.insertAdjacentHTML('beforeend',xs.map(x=>(r||C)(x)).join(''))}catch{end=1}s.innerHTML='';busy=0;if(!end&&s.getBoundingClientRect().top<innerHeight+300)more()};
+ const more=async()=>{if(busy||end)return;busy=1;s.innerHTML=LD;try{const xs=await fn(p++);if(!xs.length){end=1;if(p<=2)g.innerHTML='<div class="em" style="grid-column:1/-1"><p>Không có kết quả nào.</p></div>'}g.insertAdjacentHTML('beforeend',xs.map(x=>(r||C)(x)).join(''))}catch{end=1;if(p<=2)g.innerHTML='<div class="em" style="grid-column:1/-1"><p>Không tải được dữ liệu. Kiểm tra mạng rồi thử lại.</p></div>'}s.innerHTML='';busy=0;if(!end&&s.getBoundingClientRect().top<innerHeight+300)more()};
  el._io&&el._io.disconnect();el._io=new IntersectionObserver(x=>x[0].isIntersecting&&more());el._io.observe(s)}
 /* ---- home ---- */
 let hk=0,ht;const hgo=n=>{const s=$$('.hs'),d=$$('.dots i');if(!s.length)return;hk=(n+s.length)%s.length;s.forEach((e,k)=>e.classList.toggle('on',k==hk));d.forEach((e,k)=>e.classList.toggle('on',k==hk))};
@@ -239,7 +239,9 @@ document.onclick=e=>{const t=e.target;let a;
 const MDX='https://api.mangadex.org',CR=['safe','suggestive'],M={};
 let ML=ld('ml')||'vi',MS='followedCount',mt,MCH=[],curM='',masc=0,rc=0;
 const qs=o=>Object.entries(o).flatMap(([k,v])=>Array.isArray(v)?v.map(x=>`${k}[]=${encodeURIComponent(x)}`):[`${k}=${encodeURIComponent(v)}`]).join('&');
-const MD=(p,o)=>J(`${MDX}${p}?${qs(o||{})}`);
+const PX=['','https://corsproxy.io/?url=','https://api.allorigins.win/raw?url='];let px=+ld('px')||0;
+async function MJ(u){for(let k=0;k<PX.length;k++){const i=(px+k)%PX.length;try{const r=await fetch(PX[i]?PX[i]+encodeURIComponent(u):u);if(r.ok){px=i;sv('px',i);return await r.json()}}catch{}}throw 0}
+const MD=(p,o)=>MJ(`${MDX}${p}?${qs(o||{})}`);
 const ST={ongoing:'Đang ra',completed:'Hoàn thành',hiatus:'Tạm ngưng',cancelled:'Đã hủy'};
 const MT=m=>{const a=m.attributes,f=m.relationships.find(r=>r.type=='cover_art')?.attributes?.fileName,t=a.title.en||Object.values(a.title)[0]||'?',alt=(a.altTitles||[]).map(x=>x[ML]).find(Boolean);
  return{id:m.id,name:alt||t,thumb:f?`https://uploads.mangadex.org/covers/${m.id}/${f}.256.jpg`:'',desc:a.description?.[ML]||a.description?.en||'',tags:(a.tags||[]).map(x=>x.attributes.name.en),status:ST[a.status]||a.status||'',year:a.year}};
@@ -264,7 +266,7 @@ ${MCH.length?`<div class="ha" style="margin:14px 0"><button class="pri" data-mc=
 ${od.map(i=>{const c=MCH[i];return`<div class="ep" data-mc="${i}" style="padding:12px 0;border-bottom:1px solid #1a1a1a"><div><b>${c.ch?'Chương '+E(c.ch):'Oneshot'}</b><small>${E(c.t||'')}</small></div></div>`}).join('')}</div>`}
 async function readCh(i){const c=MCH[i];if(!c)return toast(i<0?'Đây là chương đầu':'Đã hết chương');rc=i;const o=$('#mr');o.classList.add('on');o.scrollTop=0;
  const bar=`<div class="rt" id="rt"><button data-x="mr">${I.x}</button><span>${E(M[curM].name)} • ${c.ch?'Chương '+E(c.ch):'Oneshot'}</span></div>`;o.innerHTML=bar+LD;
- try{const r=await J(`${MDX}/at-home/server/${c.id}`);
+ try{const r=await MJ(`${MDX}/at-home/server/${c.id}`);
   o.innerHTML=bar+`<div class="pg">${r.chapter.data.map(n=>`<img loading="lazy" src="${r.baseUrl}/data/${r.chapter.hash}/${n}">`).join('')}</div><div class="rn"><button data-rd="-1">← Chương trước</button><button class="nx" data-rd="1">Chương sau →</button></div>`;
   S.mh[curM]={x:{id:curM,name:M[curM].name,thumb:M[curM].thumb},ch:c.ch||'',at:Date.now()};sv('mh',S.mh);sync()}
  catch{o.innerHTML=bar+'<div class="em">Không tải được chương này.</div>'}}
