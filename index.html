@@ -122,7 +122,7 @@ let cp=0,gInit={};
 function go(i){cp=i;$$('.page').forEach((p,k)=>p.classList.toggle('on',k==i));$$('#tabs button').forEach(b=>b.classList.toggle('on',+b.dataset.go==i));scrollTo(0,0);
  if(i==1)lists();if(i==2&&!gInit[2]){gInit[2]=1;gc();browse('')}if(i==3&&!gInit[3]){gInit[3]=1;year(new Date().getFullYear())}if(i==4)acct();if(i==5){if(!gInit[5]){gInit[5]=1;mchips();mload()}mrecent()}}
 function G(el,fn,r){let p=1,end=0,busy=0;el.innerHTML='<div class="gr"></div><div class="sen"></div>';const g=el.firstChild,s=el.lastChild;
- const more=async()=>{if(busy||end)return;busy=1;s.innerHTML=LD;try{const xs=await fn(p++);if(!xs.length){end=1;if(p<=2)g.innerHTML='<div class="em" style="grid-column:1/-1"><p>Không có kết quả nào.</p></div>'}g.insertAdjacentHTML('beforeend',xs.map(x=>(r||C)(x)).join(''))}catch{end=1;if(p<=2)g.innerHTML='<div class="em" style="grid-column:1/-1"><p>Không tải được dữ liệu. Kiểm tra mạng rồi thử lại.</p></div>'}s.innerHTML='';busy=0;if(!end&&s.getBoundingClientRect().top<innerHeight+300)more()};
+ const more=async()=>{if(busy||end)return;busy=1;s.innerHTML=LD;try{const xs=await fn(p++);if(!xs.length){end=1;if(p<=2)g.innerHTML='<div class="em" style="grid-column:1/-1"><p>Không có kết quả nào.</p></div>'}g.insertAdjacentHTML('beforeend',xs.map(x=>(r||C)(x)).join(''))}catch{end=1;if(p<=2)g.innerHTML='<div class="em" style="grid-column:1/-1"><p>Không tải được dữ liệu. Kiểm tra mạng rồi thử lại.'+(cp==5&&MERR?'<br><small style="color:#777">'+E(MERR)+'</small>':'')+'</p></div>'}s.innerHTML='';busy=0;if(!end&&s.getBoundingClientRect().top<innerHeight+300)more()};
  el._io&&el._io.disconnect();el._io=new IntersectionObserver(x=>x[0].isIntersecting&&more());el._io.observe(s)}
 /* ---- home ---- */
 let hk=0,ht;const hgo=n=>{const s=$$('.hs'),d=$$('.dots i');if(!s.length)return;hk=(n+s.length)%s.length;s.forEach((e,k)=>e.classList.toggle('on',k==hk));d.forEach((e,k)=>e.classList.toggle('on',k==hk))};
@@ -239,8 +239,10 @@ document.onclick=e=>{const t=e.target;let a;
 const MDX='https://api.mangadex.org',CR=['safe','suggestive'],M={};
 let ML=ld('ml')||'vi',MS='followedCount',mt,MCH=[],curM='',masc=0,rc=0;
 const qs=o=>Object.entries(o).flatMap(([k,v])=>Array.isArray(v)?v.map(x=>`${k}[]=${encodeURIComponent(x)}`):[`${k}=${encodeURIComponent(v)}`]).join('&');
-const PX=['','https://corsproxy.io/?url=','https://api.allorigins.win/raw?url='];let px=+ld('px')||0;
-async function MJ(u){for(let k=0;k<PX.length;k++){const i=(px+k)%PX.length;try{const r=await fetch(PX[i]?PX[i]+encodeURIComponent(u):u);if(r.ok){px=i;sv('px',i);return await r.json()}}catch{}}throw 0}
+const WP='';/* dán địa chỉ Cloudflare Worker vào đây, ví dụ https://phimdem-proxy.tenban.workers.dev */
+const PX=[...(WP?[u=>`${WP}?u=${encodeURIComponent(u)}`]:[]),u=>u,u=>'https://corsproxy.io/?url='+encodeURIComponent(u),u=>'https://api.allorigins.win/raw?url='+encodeURIComponent(u)];
+let px=WP?0:(+ld('px')||0)%PX.length,MERR='';
+async function MJ(u){MERR='';for(let k=0;k<PX.length;k++){const i=(px+k)%PX.length;try{const r=await fetch(PX[i](u));if(r.ok){px=i;sv('px',i);return await r.json()}MERR+=`[${i}] HTTP ${r.status} `}catch(e){MERR+=`[${i}] ${e.message||'lỗi mạng'} `}}throw new Error(MERR)}
 const MD=(p,o)=>MJ(`${MDX}${p}?${qs(o||{})}`);
 const ST={ongoing:'Đang ra',completed:'Hoàn thành',hiatus:'Tạm ngưng',cancelled:'Đã hủy'};
 const MT=m=>{const a=m.attributes,f=m.relationships.find(r=>r.type=='cover_art')?.attributes?.fileName,t=a.title.en||Object.values(a.title)[0]||'?',alt=(a.altTitles||[]).map(x=>x[ML]).find(Boolean);
